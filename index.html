@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mini Social Feed</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", Arial;
+      margin: 0;
+    }
+
+    body {
+      background: linear-gradient(135deg, #f0f0f5, #e6e6ec);
+      display: flex;
+      justify-content: center;
+      padding: 40px 10px;
+      color: #111;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 600px;
+      background: rgba(255,255,255,0.7);
+      backdrop-filter: blur(15px);
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+    }
+
+    header {
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+      padding-bottom: 16px;
+      margin-bottom: 20px;
+    }
+
+    header h1 {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .composer textarea {
+      width: 100%;
+      border-radius: 16px;
+      border: 1px solid #ddd;
+      padding: 14px;
+      font-size: 15px;
+      resize: none;
+      min-height: 80px;
+      outline: none;
+    }
+
+    .composer textarea:focus {
+      border-color: #0071e3;
+      box-shadow: 0 0 0 2px rgba(0,113,227,0.2);
+    }
+
+    .composer button {
+      margin-top: 10px;
+      padding: 12px 20px;
+      border-radius: 999px;
+      border: none;
+      background: #0071e3;
+      color: white;
+      font-weight: 600;
+      float: right;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .composer button:hover {
+      background: #0a84ff;
+    }
+
+    .feed {
+      margin-top: 70px;
+    }
+
+    .post {
+      background: rgba(255,255,255,0.9);
+      border-radius: 20px;
+      padding: 16px;
+      margin-bottom: 14px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+      animation: fadeUp 0.25s ease;
+    }
+
+    .post-text {
+      font-size: 15px;
+      margin-bottom: 10px;
+      line-height: 1.5;
+    }
+
+    .post-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #555;
+    }
+
+    .like-btn {
+      cursor: pointer;
+      border: none;
+      background: none;
+      font-size: 14px;
+    }
+
+    .like-btn.liked {
+      color: #ff2d55;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <header>
+      <h1>Social</h1>
+    </header>
+
+    <section class="composer">
+      <textarea id="postInput" placeholder="What's happening?"></textarea>
+      <button id="postBtn">Post</button>
+    </section>
+
+    <section id="feed" class="feed"></section>
+  </div>
+
+  <script>
+    const postInput = document.getElementById("postInput");
+    const postBtn = document.getElementById("postBtn");
+    const feed = document.getElementById("feed");
+
+    let posts = JSON.parse(localStorage.getItem("posts")) || [];
+
+    renderPosts();
+
+    postBtn.addEventListener("click", () => {
+      const text = postInput.value.trim();
+      if (!text) return;
+
+      const post = {
+        id: Date.now(),
+        text,
+        likes: 0,
+        time: new Date().toLocaleString()
+      };
+
+      posts.unshift(post);
+      save();
+      renderPosts();
+      postInput.value = "";
+    });
+
+    function toggleLike(id) {
+      const post = posts.find(p => p.id === id);
+      post.likes++;
+      save();
+      renderPosts();
+    }
+
+    function save() {
+      localStorage.setItem("posts", JSON.stringify(posts));
+    }
+
+    function renderPosts() {
+      feed.innerHTML = posts.map(post => `
+        <div class="post">
+          <div class="post-text">${post.text}</div>
+          <div class="post-footer">
+            <span>${post.time}</span>
+            <button class="like-btn" onclick="toggleLike(${post.id})">
+              ❤️ ${post.likes}
+            </button>
+          </div>
+        </div>
+      `).join("");
+    }
+  </script>
+</body>
+</html>
